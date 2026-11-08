@@ -1,17 +1,46 @@
+# ── Terraform ────────────────────────────────────────────────────────────────
 .terraform/
 .terraform.lock.hcl
-terraform.tfvars
+.terraform.tfstate.lock.info
+# State files contain every secret in plaintext (DB password, keys) - never commit
 terraform.tfstate
 terraform.tfstate.backup
+terraform.tfstate.*.backup
+*.tfstate
+*.tfstate.*
+# Real variable values (deploy.py writes the DB password here)
+terraform.tfvars
+*.auto.tfvars
+crash.log
+
+# ── Keys, SSH config, credentials ────────────────────────────────────────────
 .learningsteps_key
 .learningsteps_key.pub
+azssh_config
+*.pem
+# NPMplus admin API session cookie (Phase 2)
+npm.cookies
+# oauth2-proxy real config holds client + cookie secrets (Phase 3); commit only *.example
+oauth2-proxy.cfg
+*.env
+.env
+!*.env.example
+
+# ── Database backups (Phase 4) ───────────────────────────────────────────────
+# Dumps contain real data - keep them on your laptop only
+*.sql
+*.dump
+backups/
+
+# ── Python / OS / tools ──────────────────────────────────────────────────────
 __pycache__/
 *.pyc
-.claude/
-SECURITY_ROADMAP.md
-.terraform.tfstate.lock.info
-terraform.tfstate.*.backup
 .DS_Store
-*.sql
+Thumbs.db
+.vscode/
+.claude/
 .playwright-mcp/
-docs/
+SECURITY_ROADMAP.md
+
+# NOTE: upstream ignored the whole docs/ folder. Removed on purpose:
+# docs/ holds the phase write-ups and screenshots that are part of the submission.
