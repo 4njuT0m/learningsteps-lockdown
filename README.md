@@ -32,7 +32,7 @@ Key facts:
 | --- | --- | --- | --- | --- | --- |
 | 0 | Baseline assessment and top 5 attack scenarios | — (12 found) | Done | `phase-0-baseline` | [00-baseline-assessment.md](docs/00-baseline-assessment.md) |
 | 1 | Management access: Entra ID SSH, SSH only from my IP | F-01, F-02 | Done | `phase-1-mgmt-access` | [01-management-access.md](docs/01-management-access.md) |
-| 2 | TLS and web application firewall (NPMplus, Let's Encrypt, CrowdSec) | F-03, F-04, F-12 | Planned | `phase-2-tls-waf` | — |
+| 2 | TLS and web application firewall (NPMplus, Let's Encrypt, CrowdSec) | F-03, F-04, F-12 | Done | `phase-2-tls-waf` | [02-tls-waf.md](docs/02-tls-waf.md) |
 | 3 | Identity-based API access (oauth2-proxy, Entra ID) | F-05 | Planned | `phase-3-identity` | — |
 | 4 | Data isolation (VNet integration) + bonus: no plaintext secrets (Key Vault, managed identity) | F-06, F-08 | Planned | `phase-4-data-isolation` | — |
 | 5 | Extra controls: least-privilege DB user, remote state, safe defaults, optional Sentinel test | F-07, F-09, F-10, F-11 | Planned | `phase-5-extra-controls` | — |
@@ -74,6 +74,14 @@ _Added in Phase 7._
 - Switched to **Entra ID SSH login**: `Virtual Machine Administrator Login` role scoped to the VM; `az ssh` issues a certificate valid for about an hour instead of a key that never expires.
 - Restricted the NSG rule `allow-ssh` from `*` to my IP through a validated Terraform variable, so my IP never lands in the repo.
 - Proved it: SSH from another IP times out; my Entra ID login still works; no new attacks after the change. Details: [docs/01-management-access.md](docs/01-management-access.md).
+
+### Phase 2 — TLS and WAF
+
+- Changed the NPMplus admin password, which was the default published in the handbook (F-12); the NPMplus audit log shows `passwordChanged: true`.
+- Published the app through NPMplus and showed the gap first: Wireshark showed every journal entry in plain HTTP.
+- Enabled a **Let's Encrypt** certificate with Force HTTPS and HSTS (2 years): TLS 1.3, AES-256-GCM, post-quantum hybrid key exchange (X25519MLKEM768). HTTP now redirects to HTTPS, and Wireshark shows only encrypted records (plus the SNI hostname).
+- Enabled the **CrowdSec WAF** (OWASP CRS): the same SQL injection and XSS payloads went from `200` to `403`, logged as `kind: waf` alerts.
+- Documented that CrowdSec shares attack signals with its central API by default. Details: [docs/02-tls-waf.md](docs/02-tls-waf.md).
 
 ## Security decisions
 
