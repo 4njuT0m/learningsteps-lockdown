@@ -26,6 +26,8 @@ id_rsa*
 *.pem
 # NPMplus admin API session cookie (Phase 2)
 npm.cookies
+# NPMplus API login body (contains the admin password) - delete after use
+login.json
 # oauth2-proxy real config holds client + cookie secrets (Phase 3); commit only *.example
 oauth2-proxy.cfg
 *.env

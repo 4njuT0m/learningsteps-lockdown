@@ -33,7 +33,7 @@ Key facts:
 | 0 | Baseline assessment and top 5 attack scenarios | — (12 found) | Done | `phase-0-baseline` | [00-baseline-assessment.md](docs/00-baseline-assessment.md) |
 | 1 | Management access: Entra ID SSH, SSH only from my IP | F-01, F-02 | Done | `phase-1-mgmt-access` | [01-management-access.md](docs/01-management-access.md) |
 | 2 | TLS and web application firewall (NPMplus, Let's Encrypt, CrowdSec) | F-03, F-04, F-12 | Done | `phase-2-tls-waf` | [02-tls-waf.md](docs/02-tls-waf.md) |
-| 3 | Identity-based API access (oauth2-proxy, Entra ID) | F-05 | Planned | `phase-3-identity` | — |
+| 3 | Identity-based API access (oauth2-proxy, Entra ID) | F-05 | Done | `phase-3-identity` | [03-identity.md](docs/03-identity.md) |
 | 4 | Data isolation (VNet integration) + bonus: no plaintext secrets (Key Vault, managed identity) | F-06, F-08 | Planned | `phase-4-data-isolation` | — |
 | 5 | Extra controls: least-privilege DB user, remote state, safe defaults, optional Sentinel test | F-07, F-09, F-10, F-11 | Planned | `phase-5-extra-controls` | — |
 | 6 | Final documentation and clean redeploy test | — | Planned | `v1.0-final` | — |
@@ -82,6 +82,13 @@ _Added in Phase 7._
 - Enabled a **Let's Encrypt** certificate with Force HTTPS and HSTS (2 years): TLS 1.3, AES-256-GCM, post-quantum hybrid key exchange (X25519MLKEM768). HTTP now redirects to HTTPS, and Wireshark shows only encrypted records (plus the SNI hostname).
 - Enabled the **CrowdSec WAF** (OWASP CRS): the same SQL injection and XSS payloads went from `200` to `403`, logged as `kind: waf` alerts.
 - Documented that CrowdSec shares attack signals with its central API by default. Details: [docs/02-tls-waf.md](docs/02-tls-waf.md).
+
+### Phase 3 — Identity gate
+
+- Showed the gap: an anonymous `POST /entries` created data with no login.
+- Registered a single-tenant Entra ID app (short-lived client secret, v2 tokens, `access_as_user` scope) and put **oauth2-proxy** in front of FastAPI through NPMplus Auth Request, with no app code changes.
+- Found and fixed extra issues: the oauth2-proxy secrets file was world-readable (now `600`); the WAF blocked my own admin change; the gate looked saved in the GUI but was missing from the Nginx config; Entra tokens had no `email` claim.
+- Proved it: anonymous and fake-token requests get `302` to the Microsoft login; a browser login and a real JWT get `200`. Decoded the JWT locally (RS256, audience = my API, 78-minute lifetime). Showed that identity and WAF complement each other: an anonymous attack gets `302`, the same attack from a signed-in session gets `403`. Details: [docs/03-identity.md](docs/03-identity.md).
 
 ## Security decisions
 
