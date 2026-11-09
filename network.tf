@@ -69,7 +69,34 @@ resource "azurerm_subnet_network_security_group_association" "app" {
   network_security_group_id = azurerm_network_security_group.app.id
 }
 
-# Day 4's Private Link migration adds a dedicated delegated subnet for
-# PostgreSQL plus a private DNS zone here (azurerm_subnet.db,
-# azurerm_private_dns_zone.postgres, azurerm_private_dns_zone_virtual_network_link.postgres)
-# — deliberately not part of the baseline. See handbook.md Day 4.
+# ── Phase 4: data isolation ──────────────────────────────────────────────────
+# PostgreSQL moves into its own subnet, delegated to Flexible Server, so the
+# server gets a private IP (10.0.2.x) and no public endpoint at all.
+resource "azurerm_subnet" "db" {
+  name                 = "snet-db"
+  resource_group_name  = azurerm_resource_group.main.name
+  virtual_network_name = azurerm_virtual_network.main.name
+  address_prefixes     = ["10.0.2.0/24"]
+
+  delegation {
+    name = "postgresql"
+    service_delegation {
+      name    = "Microsoft.DBforPostgreSQL/flexibleServers"
+      actions = ["Microsoft.Network/virtualNetworks/subnets/join/action"]
+    }
+  }
+}
+
+# Private DNS: inside the VNet, psql-<prefix>.postgres.database.azure.com
+# resolves to the private IP, so the app's connection string stays the same.
+resource "azurerm_private_dns_zone" "postgres" {
+  name                = "privatelink.postgres.database.azure.com"
+  resource_group_name = azurerm_resource_group.main.name
+}
+
+resource "azurerm_private_dns_zone_virtual_network_link" "postgres" {
+  name                  = "postgres-dns-link"
+  resource_group_name   = azurerm_resource_group.main.name
+  private_dns_zone_name = azurerm_private_dns_zone.postgres.name
+  virtual_network_id    = azurerm_virtual_network.main.id
+}
