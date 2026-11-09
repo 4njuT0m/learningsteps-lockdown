@@ -12,11 +12,17 @@ terraform.tfstate.*.backup
 terraform.tfvars
 *.auto.tfvars
 crash.log
+# Saved plans/plan dumps show subscription, tenant and resource details
+*.tfplan
+plan.txt
 
 # ── Keys, SSH config, credentials ────────────────────────────────────────────
 .learningsteps_key
 .learningsteps_key.pub
 azssh_config
+# 'az ssh config' writes a short-lived key pair + Entra certificate here (Phase 1)
+az_ssh_config/
+id_rsa*
 *.pem
 # NPMplus admin API session cookie (Phase 2)
 npm.cookies

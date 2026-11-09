@@ -33,7 +33,9 @@ resource "azurerm_network_security_group" "app" {
     protocol                   = "Tcp"
     source_port_range          = "*"
     destination_port_range     = "22"
-    source_address_prefix      = "*"
+    # Phase 1: only my admin IP may reach SSH (was "*" = the whole internet).
+    # The value lives in terraform.tfvars (git-ignored), so my IP is not in the repo.
+    source_address_prefix      = var.admin_source_ip
     destination_address_prefix = "*"
   }
 

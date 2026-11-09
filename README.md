@@ -31,7 +31,7 @@ Key facts:
 | Phase | Topic | Findings closed | Status | Tag | Write-up |
 | --- | --- | --- | --- | --- | --- |
 | 0 | Baseline assessment and top 5 attack scenarios | — (12 found) | Done | `phase-0-baseline` | [00-baseline-assessment.md](docs/00-baseline-assessment.md) |
-| 1 | Management access: Entra ID SSH, SSH only from my IP | F-01, F-02 | Planned | `phase-1-mgmt-access` | — |
+| 1 | Management access: Entra ID SSH, SSH only from my IP | F-01, F-02 | Done | `phase-1-mgmt-access` | [01-management-access.md](docs/01-management-access.md) |
 | 2 | TLS and web application firewall (NPMplus, Let's Encrypt, CrowdSec) | F-03, F-04, F-12 | Planned | `phase-2-tls-waf` | — |
 | 3 | Identity-based API access (oauth2-proxy, Entra ID) | F-05 | Planned | `phase-3-identity` | — |
 | 4 | Data isolation (VNet integration) + bonus: no plaintext secrets (Key Vault, managed identity) | F-06, F-08 | Planned | `phase-4-data-isolation` | — |
@@ -67,6 +67,13 @@ _Added in Phase 7._
 - Created this repository from the upstream project and kept `upstream` as a second remote, so the first commit is the untouched baseline.
 - Fixed `.gitignore`: upstream ignored the whole `docs/` folder, which would have kept every write-up and screenshot out of the repository. I also added rules for the files later phases create that hold secrets or real data (`azssh_config`, `npm.cookies`, `oauth2-proxy.cfg`, database dumps).
 - Deployed the baseline with `deploy.py` (24 resources, all smoke tests passed) and recorded 12 findings with evidence, plus a top-5 attack scenario risk table. Details: [docs/00-baseline-assessment.md](docs/00-baseline-assessment.md).
+
+### Phase 1 — Management access
+
+- Showed the gap on my own VM: **132 SSH login attempts from 5 IPs**, the first only **29 minutes** after the VM was created.
+- Switched to **Entra ID SSH login**: `Virtual Machine Administrator Login` role scoped to the VM; `az ssh` issues a certificate valid for about an hour instead of a key that never expires.
+- Restricted the NSG rule `allow-ssh` from `*` to my IP through a validated Terraform variable, so my IP never lands in the repo.
+- Proved it: SSH from another IP times out; my Entra ID login still works; no new attacks after the change. Details: [docs/01-management-access.md](docs/01-management-access.md).
 
 ## Security decisions
 

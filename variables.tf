@@ -38,3 +38,13 @@ variable "db_name" {
   type        = string
   default     = "learning_journal"
 }
+
+variable "admin_source_ip" {
+  description = "Public IPv4 address (CIDR, e.g. 203.0.113.10/32) allowed to reach SSH on port 22. Get it with: curl -s -4 ifconfig.me"
+  type        = string
+
+  validation {
+    condition     = can(cidrhost(var.admin_source_ip, 0)) && !contains(["*", "0.0.0.0/0", "Internet", "Any"], var.admin_source_ip)
+    error_message = "admin_source_ip must be a single IPv4 CIDR such as 203.0.113.10/32, never * or 0.0.0.0/0."
+  }
+}
