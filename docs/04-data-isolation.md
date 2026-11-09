@@ -1,6 +1,6 @@
 # Phase 4 — Data Isolation
 
-**Course:** LearningSteps Lockdown, Part 4 · **Date:** 2026-11-09 · **Closes:** F-06 (bonus: F-08) · **Tag:** `phase-4-data-isolation`
+**Course:** LearningSteps Lockdown, Part 4 · **Date:** 2026-11-09 · **Closes:** F-06 · **Tag:** `phase-4-data-isolation`
 
 The database, the "crown jewel" of the system, no longer has a public endpoint. PostgreSQL now sits in its own delegated subnet (`snet-db`, 10.0.2.0/24) with a private IP, and its hostname only resolves inside the virtual network. From the internet it can't be resolved, scanned or reached. Only the VM can talk to it, over the Azure backbone. The migration recreated the server, so I did it **backup-first**: dump → migrate → restore → verify, with no data lost.
 
@@ -104,4 +104,4 @@ sudo systemctl restart learningsteps
 
 - **Downtime:** the app could not reach a database for about 5–10 minutes during the recreation, plus the restore. In production this would be a planned maintenance window, or a migration to a new server followed by a cut-over.
 - **No NSG on `snet-db`.** Inside the VNet any subnet can reach port 5432. An NSG allowing 5432 only from `snet-app` (10.0.1.0/24) would add defence in depth.
-- **The DB admin password is still in plaintext on the VM** (systemd unit, cloud-init data), and the app still connects as the admin user. The bonus below and Phase 5 deal with this.
+- **The DB admin password is still in plaintext on the VM** (systemd unit, cloud-init data), and the app still connects as the admin user (F-08, F-09). The course's bonus idea, Key Vault with the VM's managed identity so the password only exists in memory, is the next step; see *Known issues and next steps* in the README.

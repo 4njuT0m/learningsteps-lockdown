@@ -158,7 +158,7 @@ Sent from my **logged-in** browser session, the WAF still blocks it with `403`:
 
 - **Any account in the Cybersteps tenant can log in**, not only me (`AzureADMyOrg` + `--email-domain=*`). Next step: set *Assignment required* on the enterprise app and assign only specific users or a group.
 - **`preferred_username` as the user name** is fine for display and logging in a single-tenant app. Microsoft advises against using it for authorization decisions, because it can change; `oid` would be the stable identifier.
-- **The client secret is still a file on the VM** (`chmod 600`, expires 2026-12-31). A managed identity or a certificate credential, or the secret in Key Vault, would be better; Phase 4's bonus applies the same idea to the database password.
+- **The client secret is still a file on the VM** (`chmod 600`, expires 2026-12-31). A certificate credential, or the secret in Key Vault read with the VM's managed identity, would be better; the same next step applies to the database password (see the README).
 - **The Azure CLI is pre-authorized for my API**, so anyone in the tenant can get a token for it with `az` without a consent prompt. That's fine for a lab; in production I would only pre-authorize my own client apps.
 - **NPMplus and oauth2-proxy configuration lives only on the VM**, not in Terraform.
 
